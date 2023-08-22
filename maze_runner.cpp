@@ -111,11 +111,7 @@ bool walk(pos_t pos) {
             pos_t new_pos = {pos.i, pos.j - 1};
             valid_positions.push(new_pos);
             maze[new_pos.i][new_pos.j] = '.'; // Marcar como visitada
-        }
-
-        
-        if (maze[pos.i][pos.j] == 's')
-        {
+        } else if (pos.j - 1 >= 0 && maze[pos.i][pos.j - 1] == 's'){
             x = 1;
         }
         
