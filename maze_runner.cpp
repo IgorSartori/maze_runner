@@ -30,7 +30,6 @@ pos_t load_maze(const char* file_name) {
     }
 
 	// Le o numero de linhas e colunas (fscanf) e salva em num_rows e num_cols
-	int num_rows, num_cols;
     fscanf(file, "%d %d", &num_rows, &num_cols); // Lê o número de linhas e colunas
 
 	// Aloca a matriz maze (malloc)
@@ -69,6 +68,7 @@ void print_maze() {
 // Função responsável pela navegação.
 // Recebe como entrada a posição inicial e retorna um booleando indicando se a saída foi encontrada
 bool walk(pos_t pos) {
+    int x = 0;
     while (!valid_positions.empty()) {
         // Marcar a posição atual com o símbolo '.'
         maze[pos.i][pos.j] = '.';
@@ -113,6 +113,13 @@ bool walk(pos_t pos) {
             maze[new_pos.i][new_pos.j] = '.'; // Marcar como visitada
         }
 
+        
+        if (maze[pos.i][pos.j] == 's')
+        {
+            x = 1;
+        }
+        
+
         // Verificar próxima posição na pilha
         if (!valid_positions.empty()) {
             pos = valid_positions.top();
@@ -128,7 +135,14 @@ bool walk(pos_t pos) {
 		valid_positions.pop();
 	}*/
 
+    if (x==1)
+    {
+        return true;
+    }else{
     return false;
+        
+    }
+    
 }
 
 int main(int argc, char* argv[]) {
