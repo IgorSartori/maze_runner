@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stack>
+#include <thread>
 
 // Matriz de char representnado o labirinto
 char** maze; // Voce também pode representar o labirinto como um vetor de vetores de char (vector<vector<char>>)
@@ -57,6 +58,7 @@ pos_t load_maze(const char* file_name) {
 
 // Função que imprime o labirinto
 void print_maze() {
+    system("clear");
 	for (int i = 0; i < num_rows; ++i) {
 		for (int j = 0; j < num_cols; ++j) {
 			printf("%c", maze[i][j]);
@@ -69,80 +71,79 @@ void print_maze() {
 // Recebe como entrada a posição inicial e retorna um booleando indicando se a saída foi encontrada
 bool walk(pos_t pos) {
     int x = 0;
-    while (!valid_positions.empty()) {
-        // Marcar a posição atual com o símbolo '.'
-        maze[pos.i][pos.j] = '.';
+    print_maze();
+    while (!valid_positions.empty() || x != 1) {
 
-        // Limpar a tela (apenas para visualização)
-        system("clear"); // Somente no Linux/Mac, você pode usar "cls" no Windows
-
-        // Imprimir o labirinto
-        print_maze();
-
-        // Verificar se a posição atual é a saída
-        if (maze[pos.i][pos.j] == 's') {
-            return true;
-        }
+        std::chrono::milliseconds delayDuration(50);
+        std::this_thread::sleep_for(delayDuration);
+        
 
         // Verificar posições adjacentes válidas e não visitadas
         // Abaixo
         if (pos.i + 1 < num_rows && maze[pos.i + 1][pos.j] == 'x') {
             pos_t new_pos = {pos.i + 1, pos.j};
             valid_positions.push(new_pos);
-            maze[new_pos.i][new_pos.j] = '.'; // Marcar como visitada
+        } else if (pos.j - 1 >= 0 && maze[pos.i + 1][pos.j] == 's'){
+            pos_t new_pos = {pos.i + 1, pos.j};
+            valid_positions.push(new_pos);
+            x = 1;
         }
 
         // Acima
         if (pos.i - 1 >= 0 && maze[pos.i - 1][pos.j] == 'x') {
             pos_t new_pos = {pos.i - 1, pos.j};
             valid_positions.push(new_pos);
-            maze[new_pos.i][new_pos.j] = '.'; // Marcar como visitada
+        } else if (pos.j - 1 >= 0 && maze[pos.i - 1][pos.j] == 's'){
+            pos_t new_pos = {pos.i - 1, pos.j};
+            valid_positions.push(new_pos);
+            x = 1;
         }
 
         // Direita
         if (pos.j + 1 < num_cols && maze[pos.i][pos.j + 1] == 'x') {
             pos_t new_pos = {pos.i, pos.j + 1};
             valid_positions.push(new_pos);
-            maze[new_pos.i][new_pos.j] = '.'; // Marcar como visitada
+        } else if (pos.j - 1 >= 0 && maze[pos.i][pos.j + 1] == 's'){
+            pos_t new_pos = {pos.i, pos.j + 1};
+            valid_positions.push(new_pos);
+            x = 1;
         }
 
         // Esquerda
         if (pos.j - 1 >= 0 && maze[pos.i][pos.j - 1] == 'x') {
             pos_t new_pos = {pos.i, pos.j - 1};
             valid_positions.push(new_pos);
-            maze[new_pos.i][new_pos.j] = '.'; // Marcar como visitada
         } else if (pos.j - 1 >= 0 && maze[pos.i][pos.j - 1] == 's'){
+            pos_t new_pos = {pos.i, pos.j - 1};
+            valid_positions.push(new_pos);
             x = 1;
         }
-        
+
+        // Marcar a posição atual com o símbolo '.'
+        maze[pos.i][pos.j] = '.';
+
+        // Imprimir o labirinto
+        print_maze();  
 
         // Verificar próxima posição na pilha
         if (!valid_positions.empty()) {
             pos = valid_positions.top();
             valid_positions.pop();
-        }
+        }        
+
+            
     }
-	
-	/*//Verifica se a pilha de posições nao esta vazia 
-	//Caso não esteja, pegar o primeiro valor de  valid_positions, remove-lo e chamar a funçao walk com esse valor
-	// Caso contrario, retornar falso
-	if (!valid_positions.empty()) {
-		pos_t next_position = valid_positions.top();
-		valid_positions.pop();
-	}*/
 
     if (x==1)
     {
         return true;
+
     }else{
-    return false;
-        
+    return false;        
     }
-    
 }
 
 int main(int argc, char* argv[]) {
-
 
 	// carregar o labirinto com o nome do arquivo recebido como argumento
     pos_t initial_pos = load_maze("/workspaces/maze_runner/data/maze.txt");
