@@ -70,21 +70,26 @@ void print_maze() {
 // Função responsável pela navegação.
 // Recebe como entrada a posição inicial e retorna um booleando indicando se a saída foi encontrada
 bool walk(pos_t pos) {
+    std::chrono::milliseconds delayDuration(100);
     int x = 0;
-    print_maze();
-    while (!valid_positions.empty() || x != 1) {
 
-        std::chrono::milliseconds delayDuration(50);
-        std::this_thread::sleep_for(delayDuration);
-        
+    print_maze();    
+    std::this_thread::sleep_for(delayDuration);
+    maze[pos.i][pos.j] = 'o';
+    print_maze();
+    std::this_thread::sleep_for(delayDuration);
+
+    while (!valid_positions.empty() || x != 1) {
 
         // Verificar posições adjacentes válidas e não visitadas
         // Abaixo
         if (pos.i + 1 < num_rows && maze[pos.i + 1][pos.j] == 'x') {
             pos_t new_pos = {pos.i + 1, pos.j};
+            maze[pos.i + 1][pos.j] = 'o';
             valid_positions.push(new_pos);
-        } else if (pos.j - 1 >= 0 && maze[pos.i + 1][pos.j] == 's'){
+        } else if (pos.i + 1 >= 0 && maze[pos.i + 1][pos.j] == 's'){
             pos_t new_pos = {pos.i + 1, pos.j};
+            maze[pos.i + 1][pos.j] = 'o';
             valid_positions.push(new_pos);
             x = 1;
         }
@@ -92,9 +97,11 @@ bool walk(pos_t pos) {
         // Acima
         if (pos.i - 1 >= 0 && maze[pos.i - 1][pos.j] == 'x') {
             pos_t new_pos = {pos.i - 1, pos.j};
+            maze[pos.i - 1][pos.j] = 'o';
             valid_positions.push(new_pos);
-        } else if (pos.j - 1 >= 0 && maze[pos.i - 1][pos.j] == 's'){
+        } else if (pos.i - 1 >= 0 && maze[pos.i - 1][pos.j] == 's'){
             pos_t new_pos = {pos.i - 1, pos.j};
+            maze[pos.i - 1][pos.j] = 'o';
             valid_positions.push(new_pos);
             x = 1;
         }
@@ -102,9 +109,11 @@ bool walk(pos_t pos) {
         // Direita
         if (pos.j + 1 < num_cols && maze[pos.i][pos.j + 1] == 'x') {
             pos_t new_pos = {pos.i, pos.j + 1};
+            maze[pos.i][pos.j + 1] = 'o';
             valid_positions.push(new_pos);
-        } else if (pos.j - 1 >= 0 && maze[pos.i][pos.j + 1] == 's'){
+        } else if (pos.j + 1 >= 0 && maze[pos.i][pos.j + 1] == 's'){
             pos_t new_pos = {pos.i, pos.j + 1};
+            maze[pos.i][pos.j + 1] = 'o';
             valid_positions.push(new_pos);
             x = 1;
         }
@@ -112,26 +121,28 @@ bool walk(pos_t pos) {
         // Esquerda
         if (pos.j - 1 >= 0 && maze[pos.i][pos.j - 1] == 'x') {
             pos_t new_pos = {pos.i, pos.j - 1};
+            maze[pos.i][pos.j - 1] = 'o';
             valid_positions.push(new_pos);
         } else if (pos.j - 1 >= 0 && maze[pos.i][pos.j - 1] == 's'){
             pos_t new_pos = {pos.i, pos.j - 1};
+            maze[pos.i][pos.j - 1] = 'o';
             valid_positions.push(new_pos);
             x = 1;
         }
+
+        std::this_thread::sleep_for(delayDuration);        
 
         // Marcar a posição atual com o símbolo '.'
         maze[pos.i][pos.j] = '.';
 
         // Imprimir o labirinto
-        print_maze();  
+        print_maze();          
 
         // Verificar próxima posição na pilha
         if (!valid_positions.empty()) {
             pos = valid_positions.top();
             valid_positions.pop();
-        }        
-
-            
+        }                    
     }
 
     if (x==1)
