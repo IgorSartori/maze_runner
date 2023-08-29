@@ -70,7 +70,7 @@ void print_maze() {
 // Função responsável pela navegação.
 // Recebe como entrada a posição inicial e retorna um booleando indicando se a saída foi encontrada
 bool walk(pos_t pos) {
-    std::chrono::milliseconds delayDuration(100);
+    std::chrono::milliseconds delayDuration(50);
     int x = 0;
 
     print_maze();    
