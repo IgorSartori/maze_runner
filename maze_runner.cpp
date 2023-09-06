@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <stack>
 #include <thread>
+#include <chrono>
+
+using namespace std;
 
 // Matriz de char representnado o labirinto
 char** maze; // Voce também pode representar o labirinto como um vetor de vetores de char (vector<vector<char>>)
@@ -17,7 +20,7 @@ struct pos_t {
 };
 
 // Estrutura de dados contendo as próximas posicões a serem exploradas no labirinto
-std::stack<pos_t> valid_positions;
+stack<pos_t> valid_positions;
 
 // Função que le o labirinto de um arquivo texto, carrega em memória e retorna a posição inicial
 pos_t load_maze(const char* file_name) {
@@ -70,43 +73,43 @@ void print_maze() {
 // Função responsável pela navegação.
 // Recebe como entrada a posição inicial e retorna um booleando indicando se a saída foi encontrada
 bool walk(pos_t pos) {
-    std::chrono::milliseconds delayDuration(40);
+    chrono::milliseconds delayDuration(40);
     int x = 0;
 
     print_maze();    
-    std::this_thread::sleep_for(delayDuration);
+    this_thread::sleep_for(delayDuration);
     maze[pos.i][pos.j] = 'o';
     print_maze();
-    std::this_thread::sleep_for(delayDuration);
+    this_thread::sleep_for(delayDuration);
+
+    int qntX;
 
     while (!valid_positions.empty() || x != 1) {
-
+        qntX = 0;
         maze[pos.i][pos.j] = 'o';
-        // Imprimir o labirinto
+        
         print_maze();
-        // Verificar posições adjacentes válidas e não visitadas
+        
         // Abaixo
         if (pos.i + 1 < num_rows && maze[pos.i + 1][pos.j] == 'x') {
             pos_t new_pos = {pos.i + 1, pos.j};
-            //maze[pos.i + 1][pos.j] = 'o';
             valid_positions.push(new_pos);
+            qntX++;
         } else if (pos.i + 1 < num_rows && maze[pos.i + 1][pos.j] == 's'){
-            pos_t new_pos = {pos.i + 1, pos.j};
-            //maze[pos.i + 1][pos.j] = 'o';
-            valid_positions.push(new_pos);
             x = 1;
             break;
         }
 
         // Acima
         if (pos.i - 1 >= 0 && maze[pos.i - 1][pos.j] == 'x') {
-            pos_t new_pos = {pos.i - 1, pos.j};
-            //maze[pos.i - 1][pos.j] = 'o';
-            valid_positions.push(new_pos);
+            pos_t new_pos = {pos.i - 1, pos.j};            
+            if (qntX >= 1) {
+                thread walk(new_pos);
+            }else{
+                valid_positions.push(new_pos);
+            }
+            qntX++;
         } else if (pos.i - 1 >= 0 && maze[pos.i - 1][pos.j] == 's'){
-            pos_t new_pos = {pos.i - 1, pos.j};
-            //maze[pos.i - 1][pos.j] = 'o';
-            valid_positions.push(new_pos);
             x = 1;
             break;
         }
@@ -114,12 +117,13 @@ bool walk(pos_t pos) {
         // Direita
         if (pos.j + 1 < num_cols && maze[pos.i][pos.j + 1] == 'x') {
             pos_t new_pos = {pos.i, pos.j + 1};
-            //maze[pos.i][pos.j + 1] = 'o';
-            valid_positions.push(new_pos);
+            if (qntX >= 1) {
+                thread walk(new_pos);
+            }else{
+                valid_positions.push(new_pos);
+            }
+            qntX++;
         } else if (pos.j + 1 < num_cols && maze[pos.i][pos.j + 1] == 's'){
-            pos_t new_pos = {pos.i, pos.j + 1};
-            //maze[pos.i][pos.j + 1] = 'o';
-            valid_positions.push(new_pos);
             x = 1;
             break;
         }
@@ -127,34 +131,31 @@ bool walk(pos_t pos) {
         // Esquerda
         if (pos.j - 1 >= 0 && maze[pos.i][pos.j - 1] == 'x') {
             pos_t new_pos = {pos.i, pos.j - 1};
-            //maze[pos.i][pos.j - 1] = 'o';
-            valid_positions.push(new_pos);
+            if (qntX >= 1) {
+                thread walk(new_pos);
+            }else{
+                valid_positions.push(new_pos);
+            }
+            qntX++;
         } else if (pos.j - 1 >= 0 && maze[pos.i][pos.j - 1] == 's'){
-            pos_t new_pos = {pos.i, pos.j - 1};
-            //maze[pos.i][pos.j - 1] = 'o';
-            valid_positions.push(new_pos);
             x = 1;
             break;
         }
 
-        std::this_thread::sleep_for(delayDuration);        
+        this_thread::sleep_for(delayDuration);
 
-        // Marcar a posição atual com o símbolo '.'
         maze[pos.i][pos.j] = '.';                  
 
-        // Verificar próxima posição na pilha
         if (!valid_positions.empty()) {
             pos = valid_positions.top();
             valid_positions.pop();
         }                    
     }
 
-    if (x==1)
-    {
+    if (x==1) {
         return true;
-
-    }else{
-    return false;        
+    } else {
+        return false;        
     }
 }
 
