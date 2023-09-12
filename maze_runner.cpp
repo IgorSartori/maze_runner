@@ -3,6 +3,7 @@
 #include <chrono>
 #include <iostream>
 #include <fstream>
+#include <unistd.h>
 
 using namespace std;
 
@@ -23,24 +24,27 @@ struct pos_t {
 
 pos_t load_maze(const char* file_name) {
     pos_t initial_pos = {-1, -1}; 
-    ifstream file(file_name);
-    file >> num_rows >> num_cols;
+    FILE* file = fopen(file_name, "r");
+    fscanf(file, "%d %d", &num_rows, &num_cols);
 
-    maze.resize(num_rows, vector<char>(num_cols));
+    maze.resize(num_rows, std::vector<char>(num_cols));
     for (int i = 0; i < num_rows; ++i) {
         for (int j = 0; j < num_cols; ++j) {
-            file >> maze[i][j];
-            if (maze[i][j] == 'e') {
+            char c;
+            fscanf(file, " %c", &c);
+            maze[i][j] = c;
+            if (c == 'e') {
                 initial_pos.i = i;
                 initial_pos.j = j;
             }
         }
     }
+
+    fclose(file);
     
     return initial_pos;
 }
 
-// Função para imprimir o labirinto
 void print_maze()
 {
 	while (!saidaEncontrada)
@@ -52,7 +56,8 @@ void print_maze()
             }
 		    printf("\n");
 	    }
-		this_thread::sleep_for(chrono::milliseconds(80));
+	    fflush(stdout); // Garante que a saída seja exibida imediatamente
+	    usleep(80000);  // Pausa o programa por 80 milissegundos
 	}
 }
 
@@ -119,16 +124,17 @@ void walk(pos_t pos) {
 
 int main(int argc, char *argv[]) {
     pos_t initial_pos = load_maze(argv[1]);
-    thread first_thread(walk, initial_pos);
 
-    first_thread.detach();
+    std::thread walk_thread(walk, initial_pos);
 
     print_maze();
 
+    walk_thread.join(); // Aguarda a conclusão da thread walk
+
     if (saidaEncontrada) {
-        cout << "Saída encontrada!" << endl;
+        std::cout << "Saída encontrada!" << std::endl;
     } else {
-        cout << "Saída não encontrada." << endl;
+        std::cout << "Saída não encontrada." << std::endl;
     }
 
     return 0;
